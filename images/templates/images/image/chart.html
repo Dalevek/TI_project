@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Wykres{% endblock %}
+
+
+{% block content %}
+    <h1>Top 10 polubionych obrazów</h1>
+
+<canvas id="myChart"></canvas>
+
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://cdn.jsdelivr.net/jquery.cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script>
+    var csrftoken = $.cookie('csrftoken');
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    })
+</script>
+<script>
+    $(document).ready(function() {
+        {% block domready %}
+        {% endblock %}
+    });
+</script>
+
+        <script>
+var ctx = document.getElementById("myChart").getContext('2d');
+
+
+
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for im in most_viewed%}
+                "{{ im.title }}",
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Ilość polubień',
+            data: [
+                {% for im in most_viewed %}
+                    {{ im.total_likes }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1
+        },
+        {
+            label: 'Ilość wyświetleń',
+            data: [
+                {% for im in total_views %}
+                    {{ im }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor:     'rgba(255,99,132,1)',
+            borderWidth: 1}],
+
+
+    },
+
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+</script>
+
+
+{% endblock %}
+
+

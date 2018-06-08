@@ -1,0 +1,98 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+
+</head>
+<body>
+    <div id="header">
+        <span class="logo">SocialApp</span>
+        {% if request.user.is_authenticated %}
+            <ul class="menu">
+                <li {% if section == "dashboard" %}class="selected"{% endif %}>
+                    <a href="{% url "dashboard" %}">Panel główny</a>
+                </li>
+                <li {% if section == "images_ranking" %}class="selected"{% endif %}>
+                    <a href="{% url "images:image_ranking" %}">Ranking obrazów</a>
+                </li>
+                <li {% if section == "images_chart" %}class="selected"{% endif %}>
+                    <a href="{% url "images:trend" %}">Ranking obrazów - wykres</a>
+                </li>
+                <li {% if section == "images" %}class="selected"{% endif %}>
+                    <a href="{% url "images:list" %}">Obrazy</a>
+                </li>
+                <li {% if section == "people" %}class="selected"{% endif %}>
+                    <a href="{% url "user_list" %}">Ludzie</a>
+                {% if request.user.is_superuser %}
+                <li {% if section == "logs" %}class="selected"{% endif %}>
+                    <a href="{% url "logs" %}">Logi</a>
+                </li>
+                <li>
+                    <a href="/admin/"><b>Panel Admina</b></a>
+                </li>
+
+                {% endif %}
+            </ul>
+        {% endif %}
+
+        <span class="user">
+            {% if request.user.is_authenticated %}
+                Witaj, {{ request.user.first_name }}!
+                <a href="{% url "logout" %}">Wyloguj</a>
+            {% else %}
+                <a href="{% url "login" %}">Zaloguj</a> | <a href="{% url "register" %}">Załóż konto</a>
+            {% endif %}
+        </span>
+    </div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">
+                    {{ message|safe }}
+                        <a href="#" class="close">&times;</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+
+
+
+    <div id="footer">
+        <span class="logo">Projekt: SocialApp | Przedmiot: Techniki Internetowe | Wykonał: Piotr Chudalewski, RSS </span>
+    </div>
+
+    {% block jquery %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="http://cdn.jsdelivr.net/jquery.cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script>
+    var csrftoken = $.cookie('csrftoken');
+    function csrfSafeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    })
+</script>
+<script>
+    $(document).ready(function() {
+        {% block domready %}
+        {% endblock %}
+    });
+</script>
+
+
+{% endblock %}
+</body>
+</html>

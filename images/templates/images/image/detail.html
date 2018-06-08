@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ image.title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ image.title }}</h1>
+    {% load thumbnail %}
+    {% thumbnail image.image "300" as im %}
+        <a href="{{ image.image.url }}">
+            <img src="{{ im.url }}" class="image-detail">
+        </a>
+    {% endthumbnail %}
+    {% with total_likes=image.users_like.count users_like=image.users_like.all %}
+        <div class="image-info">
+            <div>
+                <span class="count">
+                    <span class="total">{{ total_likes }}</span> polubień
+                </span>
+                <span class="count">
+                    <span>{{ total_views}}</span> wyświetleń
+                </span>
+                <span class="count">
+                    <span>{{ image.user }}</span> jest autorem
+                </span>
+                    {% if request.user not in users_like %}
+                    <a href="#" data-id="{{ image.id }}" data-action="like" class="like button">
+                    Lubię
+                    </a>
+                    {% else %}
+                    <a href="#" data-id="{{ image.id }}" data-action="unlike" class="like button">
+                    Nie lubię
+                    </a>
+                    {% endif %}
+            </div>
+             {{ image.description|linebreaks }}
+        </div>
+        <div class="image-likes">
+            {% for user in image.users_like.all %}
+                <div>
+                    <img src="{{ user.profile.photo.url }}">
+                    <p>{{ user.first_name }}</p>
+                </div>
+            {% empty %}
+                Jeszcze nikt nie polubił obrazu.
+            {% endfor %}
+        </div>
+    {% endwith %}
+{% endblock %}
+
+{% block domready %}
+
+    $('a.like').click(function(e){
+        e.preventDefault();
+        $.post('{% url "images:like" %}',
+            {
+                id: $(this).data('id'),
+                action: $(this).data('action')
+            },
+            function(data){
+                if (data['status'] == 'ok')
+                {
+                  var previous_action = $('a.like').data('action');
+
+                  // Zmiana wartości atrybutu data-action.
+                  $('a.like').data('action', previous_action == 'like' ? 'unlike' : 'like');
+                  $('a.like').data('action', previous_action == 'unlike' ? 'like' : 'unlike');
+                  // Zmiana tekstu wyświetlanego przez łącze.
+                  $('a.like').text(previous_action == 'like' ? 'Nie lubię' : 'Lubię');
+                  // Uaktualnienie całkowitej liczby polubienia danego obrazu.
+                  var previous_likes = parseInt($('span.count .total').text());
+                  $('span.count .total').text(previous_action == 'like' ? previous_likes + 1 : previous_likes - 1);
+
+
+                }
+
+            }
+        );
+    });
+{% endblock %}

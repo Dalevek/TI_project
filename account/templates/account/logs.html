@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Logi administracyjne{% endblock %}
+
+{% block content %}
+    <h1>Logi administracyjne</h1>
+    <div id="action-list">
+{#    #}
+{#        {% for log in logs %}#}
+{#           {{ log.action_time }} - {{ log.user|capfirst }} -#}
+{#            {% if log.action_flag == 1 %}dodał{% elif log.action_flag == 2 %}zmienił{% else %}usunął{% endif %} -#}
+{#            {{ log.change_message }} - {{ log.content_type }} - {{ log.object_repr }}<br>#}
+{#        {% endfor %}#}
+    <ul class="menu">
+
+                <table border="1">
+                <tbody>
+                <tr>
+                    <td><b>Data</b></td>
+                    <td><b>Użytkownik</b></td>
+                    <td><b>Akcja</b></td>
+                    <td><b>Wiadomość</b></td>
+                    <td><b>Typ</b></td>
+                    <td><b>Obiekt</b></td>
+                </tr>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.action_time }}</td>
+                    <td>{{ log.user|capfirst }}</td>
+                    <td>{% if log.action_flag == 1 %}dodał{% elif log.action_flag == 2 %}zmienił{% else %}usunął{% endif %}</td>
+                    <td>{{ log.change_message|slice:"100" }}</td>
+                    <td>{{ log.content_type }}</td>
+                    <td>{{ log.object_repr|slice:"80" }} </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+    </ul>
+    </div>
+    <br/>
+    <div style="text-align: center;">
+        <span>
+
+            {% if logs.has_previous %}
+                <a href="?page={{ logs.previous_page_number }}">Poprzednia</a>
+            {% endif %}
+
+            <span>
+                Strona {{ logs.number }} z {{ logs.paginator.num_pages }}
+            </span>
+
+            {% if logs.has_next %}
+                <a href="?page={{ logs.next_page_number }}">Następna</a>
+            {% endif %}
+        </span>
+    </div>
+
+{% endblock %}
